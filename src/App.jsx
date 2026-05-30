@@ -6,7 +6,9 @@ import Toast from './components/Toast';
 import { generateJourneyMapSvg } from './utils/svgExport';
 
 // Setup default zero state structure
-const createInitialState = () => ({
+const createDefaultPersona = (id, name) => ({
+  id,
+  name,
   lens: {
     persona: '',
     scenario: '',
@@ -14,7 +16,7 @@ const createInitialState = () => ({
   },
   phases: [
     {
-      id: 'phase-1',
+      id: `phase-${id}-1`,
       name: 'Phase 1',
       emotion: 0,
       actions: '',
@@ -24,7 +26,7 @@ const createInitialState = () => ({
       opportunities: ''
     },
     {
-      id: 'phase-2',
+      id: `phase-${id}-2`,
       name: 'Phase 2',
       emotion: 0,
       actions: '',
@@ -34,7 +36,7 @@ const createInitialState = () => ({
       opportunities: ''
     },
     {
-      id: 'phase-3',
+      id: `phase-${id}-3`,
       name: 'Phase 3',
       emotion: 0,
       actions: '',
@@ -47,9 +49,16 @@ const createInitialState = () => ({
 });
 
 export default function App() {
-  const defaultState = createInitialState();
-  const [lens, setLens] = useState(defaultState.lens);
-  const [phases, setPhases] = useState(defaultState.phases);
+  const [personas, setPersonas] = useState([
+    createDefaultPersona('persona-1', 'Persona 1')
+  ]);
+  const [activePersonaId, setActivePersonaId] = useState('persona-1');
+
+  // Derive active persona, lens, and phases
+  const activePersonaIndex = personas.findIndex(p => p.id === activePersonaId);
+  const activePersona = activePersonaIndex !== -1 ? personas[activePersonaIndex] : personas[0];
+  const lens = activePersona.lens;
+  const phases = activePersona.phases;
 
   // Modal and Toast States
   const [showResetModal, setShowResetModal] = useState(false);
@@ -66,46 +75,119 @@ export default function App() {
 
   // Lens State Handlers
   const handleUpdateLens = (field, value) => {
-    setLens((prev) => ({ ...prev, [field]: value }));
+    setPersonas((prev) => {
+      const updated = [...prev];
+      const idx = updated.findIndex(p => p.id === activePersonaId);
+      if (idx !== -1) {
+        updated[idx] = {
+          ...updated[idx],
+          lens: {
+            ...updated[idx].lens,
+            [field]: value
+          }
+        };
+      }
+      return updated;
+    });
+  };
+
+  const handleAddPersona = () => {
+    const newId = `persona-${Date.now()}`;
+    const newName = `Persona ${personas.length + 1}`;
+    const newPersona = createDefaultPersona(newId, newName);
+    setPersonas((prev) => [...prev, newPersona]);
+    setActivePersonaId(newId);
+    triggerToast('New persona created!', 'success');
+  };
+
+  const handleDeletePersona = (id) => {
+    if (personas.length <= 1) return;
+    setPersonas((prev) => {
+      const filtered = prev.filter(p => p.id !== id);
+      // Switch active persona if deleting the current active one
+      if (activePersonaId === id) {
+        const deleteIdx = prev.findIndex(p => p.id === id);
+        const nextActive = filtered[Math.max(0, deleteIdx - 1)] || filtered[0];
+        setActivePersonaId(nextActive.id);
+      }
+      return filtered;
+    });
+    triggerToast('Persona deleted.', 'info');
+  };
+
+  const handleRenamePersona = (id, newName) => {
+    setPersonas((prev) => {
+      return prev.map((p) => (p.id === id ? { ...p, name: newName } : p));
+    });
   };
 
   // Phases State Handlers
   const handleUpdatePhase = (index, field, value) => {
-    setPhases((prev) => {
+    setPersonas((prev) => {
       const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
+      const idx = updated.findIndex(p => p.id === activePersonaId);
+      if (idx !== -1) {
+        const updatedPhases = [...updated[idx].phases];
+        updatedPhases[index] = { ...updatedPhases[index], [field]: value };
+        updated[idx] = {
+          ...updated[idx],
+          phases: updatedPhases
+        };
+      }
       return updated;
     });
   };
 
   const handleAddPhase = () => {
-    setPhases((prev) => [
-      ...prev,
-      {
-        id: `phase-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        name: `Phase ${prev.length + 1}`,
-        emotion: 0,
-        actions: '',
-        touchpoints: '',
-        thoughts: '',
-        painPoints: '',
-        opportunities: ''
+    setPersonas((prev) => {
+      const updated = [...prev];
+      const idx = updated.findIndex(p => p.id === activePersonaId);
+      if (idx !== -1) {
+        const updatedPhases = [
+          ...updated[idx].phases,
+          {
+            id: `phase-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            name: `Phase ${updated[idx].phases.length + 1}`,
+            emotion: 0,
+            actions: '',
+            touchpoints: '',
+            thoughts: '',
+            painPoints: '',
+            opportunities: ''
+          }
+        ];
+        updated[idx] = {
+          ...updated[idx],
+          phases: updatedPhases
+        };
       }
-    ]);
+      return updated;
+    });
     triggerToast('Phase added successfully!', 'info');
   };
 
   const handleDeletePhase = (index) => {
-    if (phases.length <= 1) return;
-    setPhases((prev) => prev.filter((_, idx) => idx !== index));
+    setPersonas((prev) => {
+      const updated = [...prev];
+      const idx = updated.findIndex(p => p.id === activePersonaId);
+      if (idx !== -1) {
+        const currentPhases = updated[idx].phases;
+        if (currentPhases.length <= 1) return prev;
+        const updatedPhases = currentPhases.filter((_, idx) => idx !== index);
+        updated[idx] = {
+          ...updated[idx],
+          phases: updatedPhases
+        };
+      }
+      return updated;
+    });
     triggerToast('Phase deleted successfully!', 'info');
   };
 
   // Full Reset Confirmation
   const handleResetConfirm = () => {
-    const freshState = createInitialState();
-    setLens(freshState.lens);
-    setPhases(freshState.phases);
+    setPersonas([createDefaultPersona('persona-1', 'Persona 1')]);
+    setActivePersonaId('persona-1');
     setShowResetModal(false);
     triggerToast('Storyboard reset successfully.', 'info');
   };
@@ -113,7 +195,14 @@ export default function App() {
   // Save map state as a downloadable JSON file
   const handleSaveMap = () => {
     try {
-      const dataToSave = { lens, phases };
+      const dataToSave = {
+        // Backwards compatibility for older parsers:
+        lens,
+        phases,
+        // Multi-persona data:
+        personas,
+        activePersonaId
+      };
       const jsonString = JSON.stringify(dataToSave, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -150,31 +239,67 @@ export default function App() {
           throw new Error('Invalid JSON format');
         }
         
-        const newLens = {
-          persona: typeof data.lens?.persona === 'string' ? data.lens.persona : '',
-          scenario: typeof data.lens?.scenario === 'string' ? data.lens.scenario : '',
-          goal: typeof data.lens?.goal === 'string' ? data.lens.goal : ''
-        };
+        let loadedPersonas = [];
+        let loadedActiveId = '';
 
-        if (!Array.isArray(data.phases)) {
-          throw new Error('JSON is missing phases array');
+        if (Array.isArray(data.personas)) {
+          loadedPersonas = data.personas.map((p, pIdx) => {
+            const id = typeof p.id === 'string' && p.id ? p.id : `loaded-persona-${pIdx}-${Date.now()}`;
+            const name = typeof p.name === 'string' && p.name ? p.name : `Persona ${pIdx + 1}`;
+            
+            const lensObj = {
+              persona: typeof p.lens?.persona === 'string' ? p.lens.persona : (typeof p.lens?.personas === 'string' ? p.lens.personas : ''),
+              scenario: typeof p.lens?.scenario === 'string' ? p.lens.scenario : '',
+              goal: typeof p.lens?.goal === 'string' ? p.lens.goal : ''
+            };
+
+            const phasesArr = Array.isArray(p.phases) ? p.phases.map((ph, idx) => ({
+              id: typeof ph.id === 'string' && ph.id ? ph.id : `loaded-phase-${idx}-${Date.now()}`,
+              name: typeof ph.name === 'string' ? ph.name : `Phase ${idx + 1}`,
+              emotion: typeof ph.emotion === 'number' && [-1, 0, 1].includes(ph.emotion) ? ph.emotion : 0,
+              actions: typeof ph.actions === 'string' ? ph.actions : '',
+              touchpoints: typeof ph.touchpoints === 'string' ? ph.touchpoints : '',
+              thoughts: typeof ph.thoughts === 'string' ? ph.thoughts : '',
+              painPoints: typeof ph.painPoints === 'string' ? ph.painPoints : '',
+              opportunities: typeof ph.opportunities === 'string' ? ph.opportunities : ''
+            })) : createDefaultPersona(id, name).phases;
+
+            return { id, name, lens: lensObj, phases: phasesArr };
+          });
+
+          loadedActiveId = typeof data.activePersonaId === 'string' && data.activePersonaId ? data.activePersonaId : loadedPersonas[0].id;
+        } else {
+          // Import legacy single-persona file
+          const id = 'persona-1';
+          const name = data.lens?.persona ? (data.lens.persona.split(',')[0].substring(0, 15) || 'Persona 1') : 'Persona 1';
+          
+          const lensObj = {
+            persona: typeof data.lens?.persona === 'string' ? data.lens.persona : (typeof data.lens?.personas === 'string' ? data.lens.personas : ''),
+            scenario: typeof data.lens?.scenario === 'string' ? data.lens.scenario : '',
+            goal: typeof data.lens?.goal === 'string' ? data.lens.goal : ''
+          };
+
+          const phasesArr = Array.isArray(data.phases) ? data.phases.map((ph, idx) => ({
+            id: typeof ph.id === 'string' && ph.id ? ph.id : `loaded-phase-${idx}-${Date.now()}`,
+            name: typeof ph.name === 'string' ? ph.name : `Phase ${idx + 1}`,
+            emotion: typeof ph.emotion === 'number' && [-1, 0, 1].includes(ph.emotion) ? ph.emotion : 0,
+            actions: typeof ph.actions === 'string' ? ph.actions : '',
+            touchpoints: typeof ph.touchpoints === 'string' ? ph.touchpoints : '',
+            thoughts: typeof ph.thoughts === 'string' ? ph.thoughts : '',
+            painPoints: typeof ph.painPoints === 'string' ? ph.painPoints : '',
+            opportunities: typeof ph.opportunities === 'string' ? ph.opportunities : ''
+          })) : createDefaultPersona(id, name).phases;
+
+          loadedPersonas = [{ id, name, lens: lensObj, phases: phasesArr }];
+          loadedActiveId = id;
         }
 
-        const newPhases = data.phases.map((p, idx) => {
-          return {
-            id: typeof p.id === 'string' && p.id ? p.id : `loaded-phase-${idx}-${Date.now()}`,
-            name: typeof p.name === 'string' ? p.name : `Phase ${idx + 1}`,
-            emotion: typeof p.emotion === 'number' && [-1, 0, 1].includes(p.emotion) ? p.emotion : 0,
-            actions: typeof p.actions === 'string' ? p.actions : '',
-            touchpoints: typeof p.touchpoints === 'string' ? p.touchpoints : '',
-            thoughts: typeof p.thoughts === 'string' ? p.thoughts : '',
-            painPoints: typeof p.painPoints === 'string' ? p.painPoints : '',
-            opportunities: typeof p.opportunities === 'string' ? p.opportunities : ''
-          };
-        });
+        if (loadedPersonas.length === 0) {
+          throw new Error('No personas could be loaded');
+        }
 
-        setLens(newLens);
-        setPhases(newPhases);
+        setPersonas(loadedPersonas);
+        setActivePersonaId(loadedActiveId);
         triggerToast('Journey map loaded successfully!', 'success');
       } catch (err) {
         triggerToast(`Load failed: ${err.message}`, 'error');
@@ -297,8 +422,14 @@ export default function App() {
         
         {/* Intro Lens Zone */}
         <JourneyLens 
-          lens={lens} 
-          onChange={handleUpdateLens} 
+          personas={personas}
+          activePersonaId={activePersonaId}
+          onSelectPersona={setActivePersonaId}
+          onAddPersona={handleAddPersona}
+          onDeletePersona={handleDeletePersona}
+          onRenamePersona={handleRenamePersona}
+          lens={lens}
+          onChange={handleUpdateLens}
         />
 
         {/* Experience Storyboard Grid */}

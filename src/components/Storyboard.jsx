@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import SentimentCurve from './SentimentCurve';
 
 // Auto-growing textarea for smooth vertical expansions
@@ -19,7 +19,7 @@ function AutoGrowTextArea({ value, onChange, placeholder, className }) {
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className={`${className} overflow-hidden w-full bg-transparent text-sm resize-none`}
+      className={`${className} overflow-hidden w-full bg-transparent text-sm resize-none text-center`}
       rows={3}
     />
   );
@@ -28,6 +28,21 @@ function AutoGrowTextArea({ value, onChange, placeholder, className }) {
 export default function Storyboard({ phases, onUpdatePhase, onDeletePhase, onAddPhase }) {
   const scrollContainerRef = useRef(null);
   const prevPhasesLength = useRef(phases.length);
+
+  // Dynamic centering calculation when columns fit in the container
+  const [isCentered, setIsCentered] = useState(false);
+
+  useEffect(() => {
+    const checkCentering = () => {
+      const containerWidth = scrollContainerRef.current ? scrollContainerRef.current.clientWidth : window.innerWidth;
+      const contentWidth = phases.length * 320 + 180 + 48; // phase columns + add button card + padding
+      setIsCentered(contentWidth < containerWidth);
+    };
+
+    checkCentering();
+    window.addEventListener('resize', checkCentering);
+    return () => window.removeEventListener('resize', checkCentering);
+  }, [phases.length]);
 
   // Smooth scroll to the far-right when a new phase is added
   useEffect(() => {
@@ -83,7 +98,9 @@ export default function Storyboard({ phases, onUpdatePhase, onDeletePhase, onAdd
       {/* Scrollable Storyboard Grid */}
       <div 
         ref={scrollContainerRef}
-        className="flex overflow-x-auto custom-scrollbar select-none py-6 scroll-smooth"
+        className={`flex overflow-x-auto custom-scrollbar select-none py-6 scroll-smooth ${
+          isCentered ? 'justify-center' : 'justify-start'
+        }`}
       >
         <div className="relative flex shrink-0 px-6">
           
@@ -110,7 +127,7 @@ export default function Storyboard({ phases, onUpdatePhase, onDeletePhase, onAdd
                   value={phase.name}
                   onChange={(e) => onUpdatePhase(index, 'name', e.target.value)}
                   placeholder={`Phase ${index + 1}`}
-                  className="bg-transparent text-sm font-bold text-slate-800 border-b border-transparent hover:border-slate-200 focus:border-indigo-500 focus:outline-none transition-colors w-full py-1"
+                  className="bg-transparent text-sm font-bold text-slate-800 border-b border-transparent hover:border-slate-200 focus:border-indigo-500 focus:outline-none transition-colors w-full py-1 text-center"
                 />
                 
                 {/* Delete Column trigger */}
@@ -180,14 +197,14 @@ export default function Storyboard({ phases, onUpdatePhase, onDeletePhase, onAdd
                     key={tier.id}
                     className={`flex flex-col gap-1.5 p-3 rounded-xl border transition-all duration-200 ${tier.styles}`}
                   >
-                    <label className="text-[10px] font-bold uppercase tracking-wider opacity-60">
+                    <label className="text-[10px] font-bold uppercase tracking-wider opacity-60 text-center">
                       {tier.label}
                     </label>
                     <AutoGrowTextArea
                       value={phase[tier.id] || ''}
                       onChange={(e) => onUpdatePhase(index, tier.id, e.target.value)}
                       placeholder={tier.placeholder}
-                      className="text-slate-800 placeholder-slate-400"
+                      className="text-slate-800 placeholder-slate-400 text-center"
                     />
                   </div>
                 ))}
