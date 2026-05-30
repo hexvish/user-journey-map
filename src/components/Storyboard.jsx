@@ -177,9 +177,9 @@ export default function Storyboard({ phases, onUpdatePhase, onDeletePhase, onAdd
                   type="button"
                   onClick={() => {
                     onUpdatePhase(index, 'emotion', 1);
-                    onUpdatePhase(index, 'emoji', phase.emoji || '🙂');
+                    onUpdatePhase(index, 'emoji', '🙂');
                   }}
-                  className="absolute top-[18px] left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border border-slate-350 bg-slate-100 hover:bg-slate-200 transition-colors z-10 cursor-pointer"
+                  className="absolute top-[18px] left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border border-slate-355 bg-slate-100 hover:bg-slate-200 transition-colors z-10 cursor-pointer"
                   title="Move to Positive"
                 />
 
@@ -187,9 +187,9 @@ export default function Storyboard({ phases, onUpdatePhase, onDeletePhase, onAdd
                   type="button"
                   onClick={() => {
                     onUpdatePhase(index, 'emotion', 0);
-                    onUpdatePhase(index, 'emoji', phase.emoji || '😐');
+                    onUpdatePhase(index, 'emoji', '😐');
                   }}
-                  className="absolute top-[56px] left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border border-slate-350 bg-slate-100 hover:bg-slate-200 transition-colors z-10 cursor-pointer"
+                  className="absolute top-[56px] left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border border-slate-355 bg-slate-100 hover:bg-slate-200 transition-colors z-10 cursor-pointer"
                   title="Move to Neutral"
                 />
 
@@ -197,9 +197,9 @@ export default function Storyboard({ phases, onUpdatePhase, onDeletePhase, onAdd
                   type="button"
                   onClick={() => {
                     onUpdatePhase(index, 'emotion', -1);
-                    onUpdatePhase(index, 'emoji', phase.emoji || '🙁');
+                    onUpdatePhase(index, 'emoji', '🙁');
                   }}
-                  className="absolute top-[94px] left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border border-slate-350 bg-slate-100 hover:bg-slate-200 transition-colors z-10 cursor-pointer"
+                  className="absolute top-[94px] left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border border-slate-355 bg-slate-100 hover:bg-slate-200 transition-colors z-10 cursor-pointer"
                   title="Move to Negative"
                 />
 
