@@ -19,7 +19,7 @@ function AutoGrowTextArea({ value, onChange, placeholder, className }) {
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className={`${className} overflow-hidden w-full bg-transparent text-sm resize-none text-center`}
+      className={`${className} overflow-hidden w-full bg-transparent text-sm resize-none`}
       rows={3}
     />
   );
@@ -127,7 +127,7 @@ export default function Storyboard({ phases, onUpdatePhase, onDeletePhase, onAdd
                   value={phase.name}
                   onChange={(e) => onUpdatePhase(index, 'name', e.target.value)}
                   placeholder={`Phase ${index + 1}`}
-                  className="bg-transparent text-sm font-bold text-slate-800 border-b border-transparent hover:border-slate-200 focus:border-indigo-500 focus:outline-none transition-colors w-full py-1 text-center"
+                  className="bg-transparent text-sm font-bold text-slate-800 border-b border-transparent hover:border-slate-200 focus:border-indigo-500 focus:outline-none transition-colors w-full py-1"
                 />
                 
                 {/* Delete Column trigger */}
@@ -197,14 +197,14 @@ export default function Storyboard({ phases, onUpdatePhase, onDeletePhase, onAdd
                     key={tier.id}
                     className={`flex flex-col gap-1.5 p-3 rounded-xl border transition-all duration-200 ${tier.styles}`}
                   >
-                    <label className="text-[10px] font-bold uppercase tracking-wider opacity-60 text-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider opacity-60">
                       {tier.label}
                     </label>
                     <AutoGrowTextArea
                       value={phase[tier.id] || ''}
                       onChange={(e) => onUpdatePhase(index, tier.id, e.target.value)}
                       placeholder={tier.placeholder}
-                      className="text-slate-800 placeholder-slate-400 text-center"
+                      className="text-slate-800 placeholder-slate-400"
                     />
                   </div>
                 ))}
