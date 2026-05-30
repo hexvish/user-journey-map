@@ -179,7 +179,7 @@ export function generateJourneyMapSvg({ lens, phases }) {
     // Draw coordinate dots and emojis
     points.forEach((p, idx) => {
       const phase = phases[idx];
-      const emoji = getEmotionEmoji(phase.emotion);
+      const emoji = phase.emoji || getEmotionEmoji(phase.emotion);
       svg += `
     <g transform="translate(${p.x}, ${p.y})">
       <circle cx="0" cy="0" r="16" fill="#ffffff" stroke="url(#curve-grad)" stroke-width="2" />

@@ -18,7 +18,8 @@ const createDefaultPersona = (id, name) => ({
     {
       id: `phase-${id}-1`,
       name: 'Phase 1',
-      emotion: 0,
+      emotion: 1,
+      emoji: '🙂',
       actions: '',
       touchpoints: '',
       thoughts: '',
@@ -28,7 +29,8 @@ const createDefaultPersona = (id, name) => ({
     {
       id: `phase-${id}-2`,
       name: 'Phase 2',
-      emotion: 0,
+      emotion: 1,
+      emoji: '🙂',
       actions: '',
       touchpoints: '',
       thoughts: '',
@@ -38,7 +40,8 @@ const createDefaultPersona = (id, name) => ({
     {
       id: `phase-${id}-3`,
       name: 'Phase 3',
-      emotion: 0,
+      emotion: 1,
+      emoji: '🙂',
       actions: '',
       touchpoints: '',
       thoughts: '',
@@ -148,7 +151,8 @@ export default function App() {
           {
             id: `phase-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             name: `Phase ${updated[idx].phases.length + 1}`,
-            emotion: 0,
+            emotion: 1,
+            emoji: '🙂',
             actions: '',
             touchpoints: '',
             thoughts: '',
@@ -253,16 +257,20 @@ export default function App() {
               goal: typeof p.lens?.goal === 'string' ? p.lens.goal : ''
             };
 
-            const phasesArr = Array.isArray(p.phases) ? p.phases.map((ph, idx) => ({
-              id: typeof ph.id === 'string' && ph.id ? ph.id : `loaded-phase-${idx}-${Date.now()}`,
-              name: typeof ph.name === 'string' ? ph.name : `Phase ${idx + 1}`,
-              emotion: typeof ph.emotion === 'number' && [-1, 0, 1].includes(ph.emotion) ? ph.emotion : 0,
-              actions: typeof ph.actions === 'string' ? ph.actions : '',
-              touchpoints: typeof ph.touchpoints === 'string' ? ph.touchpoints : '',
-              thoughts: typeof ph.thoughts === 'string' ? ph.thoughts : '',
-              painPoints: typeof ph.painPoints === 'string' ? ph.painPoints : '',
-              opportunities: typeof ph.opportunities === 'string' ? ph.opportunities : ''
-            })) : createDefaultPersona(id, name).phases;
+            const phasesArr = Array.isArray(p.phases) ? p.phases.map((ph, idx) => {
+              const emotion = typeof ph.emotion === 'number' && [-1, 0, 1].includes(ph.emotion) ? ph.emotion : 1;
+              return {
+                id: typeof ph.id === 'string' && ph.id ? ph.id : `loaded-phase-${idx}-${Date.now()}`,
+                name: typeof ph.name === 'string' ? ph.name : `Phase ${idx + 1}`,
+                emotion: emotion,
+                emoji: typeof ph.emoji === 'string' && ph.emoji ? ph.emoji : (emotion === 1 ? '🙂' : emotion === -1 ? '🙁' : '😐'),
+                actions: typeof ph.actions === 'string' ? ph.actions : '',
+                touchpoints: typeof ph.touchpoints === 'string' ? ph.touchpoints : '',
+                thoughts: typeof ph.thoughts === 'string' ? ph.thoughts : '',
+                painPoints: typeof ph.painPoints === 'string' ? ph.painPoints : '',
+                opportunities: typeof ph.opportunities === 'string' ? ph.opportunities : ''
+              };
+            }) : createDefaultPersona(id, name).phases;
 
             return { id, name, lens: lensObj, phases: phasesArr };
           });
@@ -279,16 +287,20 @@ export default function App() {
             goal: typeof data.lens?.goal === 'string' ? data.lens.goal : ''
           };
 
-          const phasesArr = Array.isArray(data.phases) ? data.phases.map((ph, idx) => ({
-            id: typeof ph.id === 'string' && ph.id ? ph.id : `loaded-phase-${idx}-${Date.now()}`,
-            name: typeof ph.name === 'string' ? ph.name : `Phase ${idx + 1}`,
-            emotion: typeof ph.emotion === 'number' && [-1, 0, 1].includes(ph.emotion) ? ph.emotion : 0,
-            actions: typeof ph.actions === 'string' ? ph.actions : '',
-            touchpoints: typeof ph.touchpoints === 'string' ? ph.touchpoints : '',
-            thoughts: typeof ph.thoughts === 'string' ? ph.thoughts : '',
-            painPoints: typeof ph.painPoints === 'string' ? ph.painPoints : '',
-            opportunities: typeof ph.opportunities === 'string' ? ph.opportunities : ''
-          })) : createDefaultPersona(id, name).phases;
+          const phasesArr = Array.isArray(data.phases) ? data.phases.map((ph, idx) => {
+            const emotion = typeof ph.emotion === 'number' && [-1, 0, 1].includes(ph.emotion) ? ph.emotion : 1;
+            return {
+              id: typeof ph.id === 'string' && ph.id ? ph.id : `loaded-phase-${idx}-${Date.now()}`,
+              name: typeof ph.name === 'string' ? ph.name : `Phase ${idx + 1}`,
+              emotion: emotion,
+              emoji: typeof ph.emoji === 'string' && ph.emoji ? ph.emoji : (emotion === 1 ? '🙂' : emotion === -1 ? '🙁' : '😐'),
+              actions: typeof ph.actions === 'string' ? ph.actions : '',
+              touchpoints: typeof ph.touchpoints === 'string' ? ph.touchpoints : '',
+              thoughts: typeof ph.thoughts === 'string' ? ph.thoughts : '',
+              painPoints: typeof ph.painPoints === 'string' ? ph.painPoints : '',
+              opportunities: typeof ph.opportunities === 'string' ? ph.opportunities : ''
+            };
+          }) : createDefaultPersona(id, name).phases;
 
           loadedPersonas = [{ id, name, lens: lensObj, phases: phasesArr }];
           loadedActiveId = id;

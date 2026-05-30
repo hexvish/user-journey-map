@@ -25,12 +25,31 @@ function AutoGrowTextArea({ value, onChange, placeholder, className }) {
   );
 }
 
+const emojiOptions = [
+  { emoji: '🙂', emotion: 1, label: 'Smile' },
+  { emoji: '😊', emotion: 1, label: 'Happy' },
+  { emoji: '😀', emotion: 1, label: 'Grin' },
+  { emoji: '🥳', emotion: 1, label: 'Celebrate' },
+  { emoji: '😍', emotion: 1, label: 'Love' },
+  { emoji: '😐', emotion: 0, label: 'Neutral' },
+  { emoji: '🤔', emotion: 0, label: 'Think' },
+  { emoji: '😮', emotion: 0, label: 'Surprise' },
+  { emoji: '🙄', emotion: 0, label: 'Roll Eyes' },
+  { emoji: '😑', emotion: 0, label: 'Flat' },
+  { emoji: '🙁', emotion: -1, label: 'Frown' },
+  { emoji: '😢', emotion: -1, label: 'Cry' },
+  { emoji: '😭', emotion: -1, label: 'Loud Cry' },
+  { emoji: '😡', emotion: -1, label: 'Angry' },
+  { emoji: '😱', emotion: -1, label: 'Scared' },
+];
+
 export default function Storyboard({ phases, onUpdatePhase, onDeletePhase, onAddPhase }) {
   const scrollContainerRef = useRef(null);
   const prevPhasesLength = useRef(phases.length);
 
   // Dynamic centering calculation when columns fit in the container
   const [isCentered, setIsCentered] = useState(false);
+  const [activePickerIndex, setActivePickerIndex] = useState(null);
 
   useEffect(() => {
     const checkCentering = () => {
@@ -150,44 +169,146 @@ export default function Storyboard({ phases, onUpdatePhase, onDeletePhase, onAdd
                   Sentiment
                 </div>
                 
-                {/* Smile button: Center at Y = 30px, Height = 32px => top = 14px */}
-                <button
-                  onClick={() => onUpdatePhase(index, 'emotion', 1)}
-                  className={`absolute top-[14px] left-1/2 -translate-x-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-20 ${
-                    phase.emotion === 1
-                      ? 'bg-emerald-500/20 text-emerald-700 border border-emerald-500/40 scale-110 shadow-md shadow-emerald-500/10'
-                      : 'bg-white text-slate-400 hover:text-slate-700 hover:bg-slate-100 border border-slate-200/80'
-                  }`}
-                  title="Smile / Positive"
-                >
-                  <span className="text-[17px] leading-none select-none">🙂</span>
-                </button>
+                {/* Vertical Center Track Line */}
+                <div className="absolute left-1/2 -translate-x-1/2 top-4 bottom-4 w-1 bg-slate-200 rounded-full" />
 
-                {/* Neutral button: Center at Y = 65px, Height = 32px => top = 49px */}
+                {/* Faint Level Markers */}
                 <button
-                  onClick={() => onUpdatePhase(index, 'emotion', 0)}
-                  className={`absolute top-[49px] left-1/2 -translate-x-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-20 ${
-                    phase.emotion === 0
-                      ? 'bg-sky-500/20 text-sky-700 border border-sky-500/40 scale-110 shadow-md shadow-sky-500/10'
-                      : 'bg-white text-slate-400 hover:text-slate-700 hover:bg-slate-100 border border-slate-200/80'
-                  }`}
-                  title="Neutral"
-                >
-                  <span className="text-[17px] leading-none select-none">😐</span>
-                </button>
+                  type="button"
+                  onClick={() => {
+                    onUpdatePhase(index, 'emotion', 1);
+                    onUpdatePhase(index, 'emoji', phase.emoji || '🙂');
+                  }}
+                  className="absolute top-[18px] left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border border-slate-350 bg-slate-100 hover:bg-slate-200 transition-colors z-10 cursor-pointer"
+                  title="Move to Positive"
+                />
 
-                {/* Frown button: Center at Y = 100px, Height = 32px => top = 84px */}
                 <button
-                  onClick={() => onUpdatePhase(index, 'emotion', -1)}
-                  className={`absolute top-[84px] left-1/2 -translate-x-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-20 ${
-                    phase.emotion === -1
-                      ? 'bg-rose-500/20 text-rose-700 border border-rose-500/40 scale-110 shadow-md shadow-rose-500/10'
-                      : 'bg-white text-slate-400 hover:text-slate-700 hover:bg-slate-100 border border-slate-200/80'
-                  }`}
-                  title="Frown / Negative"
-                >
-                  <span className="text-[17px] leading-none select-none">🙁</span>
-                </button>
+                  type="button"
+                  onClick={() => {
+                    onUpdatePhase(index, 'emotion', 0);
+                    onUpdatePhase(index, 'emoji', phase.emoji || '😐');
+                  }}
+                  className="absolute top-[56px] left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border border-slate-350 bg-slate-100 hover:bg-slate-200 transition-colors z-10 cursor-pointer"
+                  title="Move to Neutral"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onUpdatePhase(index, 'emotion', -1);
+                    onUpdatePhase(index, 'emoji', phase.emoji || '🙁');
+                  }}
+                  className="absolute top-[94px] left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border border-slate-350 bg-slate-100 hover:bg-slate-200 transition-colors z-10 cursor-pointer"
+                  title="Move to Negative"
+                />
+
+                {/* Active Emote Circle Button */}
+                {(() => {
+                  const emoteY = phase.emotion === 1 ? 'top-[10px]' : phase.emotion === -1 ? 'top-[86px]' : 'top-[48px]';
+                  const activeEmoji = phase.emoji || (phase.emotion === 1 ? '🙂' : phase.emotion === -1 ? '🙁' : '😐');
+                  
+                  let ringColor = 'bg-sky-500/20 text-sky-700 border-sky-500/40 shadow-sky-500/10';
+                  if (phase.emotion === 1) ringColor = 'bg-emerald-500/20 text-emerald-700 border-emerald-500/40 shadow-emerald-500/10';
+                  if (phase.emotion === -1) ringColor = 'bg-rose-500/20 text-rose-700 border-rose-500/40 shadow-rose-500/10';
+
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => setActivePickerIndex(activePickerIndex === index ? null : index)}
+                      className={`absolute ${emoteY} left-1/2 -translate-x-1/2 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 z-20 bg-white border scale-110 shadow-md ${ringColor} hover:scale-120 cursor-pointer`}
+                      title="Select Emote"
+                    >
+                      <span className="text-[19px] leading-none select-none">{activeEmoji}</span>
+                    </button>
+                  );
+                })()}
+
+                {/* Emoji popover picker */}
+                {activePickerIndex === index && (
+                  <div className="absolute top-1/2 -translate-y-1/2 left-[calc(50%+24px)] bg-white border border-slate-200/90 rounded-2xl shadow-xl p-3 z-30 flex flex-col gap-2.5 w-[190px] select-text">
+                    <div className="flex justify-between items-center pb-1.5 border-b border-slate-100">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        Select Emote
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setActivePickerIndex(null)}
+                        className="text-slate-400 hover:text-slate-650 text-xs font-bold cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col gap-2 max-h-[140px] overflow-y-auto custom-scrollbar">
+                      {/* Positive Section */}
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[8px] font-bold text-emerald-600 uppercase tracking-wider text-left">Positive</span>
+                        <div className="grid grid-cols-5 gap-1">
+                          {emojiOptions.filter(o => o.emotion === 1).map(opt => (
+                            <button
+                              key={opt.emoji}
+                              type="button"
+                              onClick={() => {
+                                onUpdatePhase(index, 'emoji', opt.emoji);
+                                onUpdatePhase(index, 'emotion', 1);
+                                setActivePickerIndex(null);
+                              }}
+                              className="hover:bg-slate-100 p-1.5 rounded text-lg transition-colors leading-none flex items-center justify-center cursor-pointer"
+                              title={opt.label}
+                            >
+                              {opt.emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Neutral Section */}
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[8px] font-bold text-sky-600 uppercase tracking-wider text-left">Neutral</span>
+                        <div className="grid grid-cols-5 gap-1">
+                          {emojiOptions.filter(o => o.emotion === 0).map(opt => (
+                            <button
+                              key={opt.emoji}
+                              type="button"
+                              onClick={() => {
+                                onUpdatePhase(index, 'emoji', opt.emoji);
+                                onUpdatePhase(index, 'emotion', 0);
+                                setActivePickerIndex(null);
+                              }}
+                              className="hover:bg-slate-100 p-1.5 rounded text-lg transition-colors leading-none flex items-center justify-center cursor-pointer"
+                              title={opt.label}
+                            >
+                              {opt.emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Negative Section */}
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[8px] font-bold text-rose-600 uppercase tracking-wider text-left">Negative</span>
+                        <div className="grid grid-cols-5 gap-1">
+                          {emojiOptions.filter(o => o.emotion === -1).map(opt => (
+                            <button
+                              key={opt.emoji}
+                              type="button"
+                              onClick={() => {
+                                onUpdatePhase(index, 'emoji', opt.emoji);
+                                onUpdatePhase(index, 'emotion', -1);
+                                setActivePickerIndex(null);
+                              }}
+                              className="hover:bg-slate-100 p-1.5 rounded text-lg transition-colors leading-none flex items-center justify-center cursor-pointer"
+                              title={opt.label}
+                            >
+                              {opt.emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Qualitative tracking tiers */}
