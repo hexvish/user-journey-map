@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-800 font-sans overflow-x-hidden;
+  }
+  
+  /* Textarea default styling to allow vertical growth and styling */
+  textarea {
+    @apply resize-y transition-colors duration-200 ease-in-out focus:outline-none;
+  }
+}
+
+/* Custom scrollbar styling for the storyboard scroll grid */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+  border: 2px solid #f1f5f9;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Smooth transitions for active SVG nodes */
+.sentiment-node {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), fill 0.2s ease;
+}
+
+.sentiment-node:hover {
+  transform: scale(1.2);
+}
+
+/* Custom styling for typography */
+.font-serif-italic {
+  font-family: 'Lora', Georgia, serif;
+  font-style: italic;
+}
